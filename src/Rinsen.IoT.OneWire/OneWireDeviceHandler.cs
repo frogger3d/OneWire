@@ -6,22 +6,10 @@ namespace Rinsen.IoT.OneWire
 {
     public class OneWireDeviceHandler : IDisposable
     {
-        DS2482_100 _ds2482_100;
-        List<IOneWireDevice> _oneWireDevices;
-        Dictionary<byte, Type> _oneWireDeviceTypes;
-
-        public IEnumerable<IOneWireDevice> OneWireDevices
-        {
-            get
-            {
-                if (_oneWireDevices == null || !_oneWireDevices.Any())
-                {
-                    GetConnectedOneWireDevices();
-                }
-                return _oneWireDevices;
-            }
-        }
-
+        private DS2482_100 _ds2482_100;
+        private List<IOneWireDevice> _oneWireDevices;
+        private Dictionary<byte, Type> _oneWireDeviceTypes;
+        
         /// <summary>
         /// One wire device handler via DS2482-100
         /// </summary>
@@ -57,7 +45,7 @@ namespace Rinsen.IoT.OneWire
             AddDeviceType<DS18B20>(0x28);
         }
 
-        void GetConnectedOneWireDevices()
+        private void GetConnectedOneWireDevices()
         {
             _oneWireDevices = new List<IOneWireDevice>();
             var first = true;
@@ -87,7 +75,7 @@ namespace Rinsen.IoT.OneWire
             }
         }
 
-        void AddOneWireDevice()
+        private void AddOneWireDevice()
         {
             if (_oneWireDeviceTypes.Any(k => k.Key == _ds2482_100.ROM_NO[0]))
             {
@@ -111,7 +99,7 @@ namespace Rinsen.IoT.OneWire
 
         public IEnumerable<T> GetDevices<T>() where T : IOneWireDevice
         {
-            return OneWireDevices.GetDevices<T>();
+            return this._oneWireDevices.GetDevices<T>();
         }
 
         public void Dispose()
