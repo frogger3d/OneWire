@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Devices.I2c;
 
 namespace Rinsen.IoT.OneWire
 {
@@ -27,9 +28,25 @@ namespace Rinsen.IoT.OneWire
             {
                 address |= 1 << 1;
             }
-            
-            _ds2482_100 = new DS2482_100(new I2cDeviceLocator().GetI2cDevice(address).Result);
 
+            var device = new I2cDeviceLocator().GetI2cDevice(address).Result;
+            _ds2482_100 = new DS2482_100(device);
+            Initialize();
+        }
+
+        /// <summary>
+        /// One wire device handler via DS2482-100
+        /// </summary>
+        /// <param name="device">Reference to the DS2482-100 I2c device</param>
+        /// <exception cref="Rinsen.IoT.OneWire.DS2482100DeviceNotFoundException">Thrown if no DS2482-100 device is detected</exception>
+        public OneWireDeviceHandler(I2cDevice device)
+        {
+            _ds2482_100 = new DS2482_100(device);
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             try
             {
                 _ds2482_100.OneWireReset();
