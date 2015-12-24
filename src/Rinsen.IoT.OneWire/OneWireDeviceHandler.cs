@@ -7,7 +7,7 @@ namespace Rinsen.IoT.OneWire
     public class OneWireDeviceHandler : IDisposable
     {
         private DS2482_100 _ds2482_100;
-        private List<IOneWireDevice> _oneWireDevices;
+        private IList<IOneWireDevice> _oneWireDevices;
         private Dictionary<byte, Type> _oneWireDeviceTypes;
         
         /// <summary>
@@ -45,9 +45,9 @@ namespace Rinsen.IoT.OneWire
             AddDeviceType<DS18B20>(0x28);
         }
 
-        private void GetConnectedOneWireDevices()
+        private IList<IOneWireDevice> GetConnectedOneWireDevices()
         {
-            _oneWireDevices = new List<IOneWireDevice>();
+            var _oneWireDevices = new List<IOneWireDevice>();
             var first = true;
             var deviceDetected = _ds2482_100.OneWireReset();
 
@@ -73,6 +73,8 @@ namespace Rinsen.IoT.OneWire
 
                 } while (result);
             }
+
+            return _oneWireDevices;
         }
 
         private void AddOneWireDevice()
@@ -97,9 +99,19 @@ namespace Rinsen.IoT.OneWire
             _oneWireDeviceTypes.Add(familyCode, typeof(T));
         }
 
+        public void RefreshDevices()
+        {
+            this._oneWireDevices = this.GetConnectedOneWireDevices();
+        }
+
+        public IEnumerable<IOneWireDevice> GetAllDevices()
+        {
+            return this._oneWireDevices.AsEnumerable();
+        }
+
         public IEnumerable<T> GetDevices<T>() where T : IOneWireDevice
         {
-            return this._oneWireDevices.GetDevices<T>();
+            return this._oneWireDevices.OfType<T>();
         }
 
         public void Dispose()
